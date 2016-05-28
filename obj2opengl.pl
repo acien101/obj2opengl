@@ -167,7 +167,7 @@ sub handleArguments() {
 	# (optional) derive output filename from input filename
 	unless($errorInOptions || defined($outFilename)) {
 		my ($file, $dir, $ext) = fileparse($inFilename, qr/\.[^.]*/);
-		$outFilename = $dir . $file . ".h";
+		$outFilename = $dir . $file . ".java";
 	}
 	
 	# (optional) define object name from output filename
@@ -488,55 +488,60 @@ sub writeOutput {
 	print OUTFILE "glDrawArrays(GL_TRIANGLES, 0, ".$object."NumVerts);\n";
 	print OUTFILE "*/\n\n";
 	
+	# Create the Java class with the verts
+	
+	print OUTFILE "public class " . $object . " { \n";
+	
 	# needed constant for glDrawArrays
-	print OUTFILE "unsigned int ".$object."NumVerts = ".($numFaces * 3).";\n\n";
+	print OUTFILE "  public static final int ".$object."NumVerts = ".($numFaces * 3).";\n\n";
 	
 	# write verts
-	print OUTFILE "float ".$object."Verts \[\] = {\n"; 
+	print OUTFILE "  public static final float ".$object."Verts \[\] = {\n"; 
 	for( $j = 0; $j < $numFaces; $j++)
 	{
 		$ia = fixedIndex($va_idx[$j], $numVerts);
 		$ib = fixedIndex($vb_idx[$j], $numVerts);
 		$ic = fixedIndex($vc_idx[$j], $numVerts);
-		print OUTFILE "  // $face_line[$j]\n";
-		print OUTFILE "  $xcoords[$ia], $ycoords[$ia], $zcoords[$ia],\n";
-		print OUTFILE "  $xcoords[$ib], $ycoords[$ib], $zcoords[$ib],\n";
-		print OUTFILE "  $xcoords[$ic], $ycoords[$ic], $zcoords[$ic],\n";
+		print OUTFILE "    // $face_line[$j]\n";
+		print OUTFILE "    $xcoords[$ia]f, $ycoords[$ia]f, $zcoords[$ia]f,\n";
+		print OUTFILE "    $xcoords[$ib]f, $ycoords[$ib]f, $zcoords[$ib]f,\n";
+		print OUTFILE "    $xcoords[$ic]f, $ycoords[$ic]f, $zcoords[$ic]f,\n";
 	}
-	print OUTFILE "};\n\n";
+	print OUTFILE "  };\n\n";
 	
 	# write normals
 	if($numNormals > 0) {
-		print OUTFILE "float ".$object."Normals \[\] = {\n"; 
+		print OUTFILE "  public static final float ".$object."Normals \[\] = {\n"; 
 		for( $j = 0; $j < $numFaces; $j++) {
 			$ia = fixedIndex($na_idx[$j], $numNormals);
 			$ib = fixedIndex($nb_idx[$j], $numNormals);
 			$ic = fixedIndex($nc_idx[$j], $numNormals);
-			print OUTFILE "  // $face_line[$j]\n";
-			print OUTFILE "  $nx[$ia], $ny[$ia], $nz[$ia],\n";
-			print OUTFILE "  $nx[$ib], $ny[$ib], $nz[$ib],\n";
-			print OUTFILE "  $nx[$ic], $ny[$ic], $nz[$ic],\n";
+			print OUTFILE "    // $face_line[$j]\n";
+			print OUTFILE "    $nx[$ia]f, $ny[$ia]f, $nz[$ia]f,\n";
+			print OUTFILE "    $nx[$ib]f, $ny[$ib]f, $nz[$ib]f,\n";
+			print OUTFILE "    $nx[$ic]f, $ny[$ic]f, $nz[$ic]f,\n";
 		}
 		
-		print OUTFILE "};\n\n";
+		print OUTFILE "  };\n\n";
 	}
 	
 	# write texture coords
 	if($numTexture) {
-		print OUTFILE "float ".$object."TexCoords \[\] = {\n"; 
+		print OUTFILE "  public static final float ".$object."TexCoords \[\] = {\n"; 
 		for( $j = 0; $j < $numFaces; $j++) {
 			$ia = fixedIndex($ta_idx[$j], $numTexture);
 			$ib = fixedIndex($tb_idx[$j], $numTexture);
 			$ic = fixedIndex($tc_idx[$j], $numTexture);
-			print OUTFILE "  // $face_line[$j]\n";
-			print OUTFILE "  $tx[$ia], $ty[$ia],\n";
-			print OUTFILE "  $tx[$ib], $ty[$ib],\n";
-			print OUTFILE "  $tx[$ic], $ty[$ic],\n";
+			print OUTFILE "    // $face_line[$j]\n";
+			print OUTFILE "    $tx[$ia], $ty[$ia],\n";
+			print OUTFILE "    $tx[$ib], $ty[$ib],\n";
+			print OUTFILE "    $tx[$ic], $ty[$ic],\n";
 		}
 		
-		print OUTFILE "};\n\n";
+		print OUTFILE "  };\n";
 	}
 	
+	print OUTFILE "}";
 	close OUTFILE;
 }
 
